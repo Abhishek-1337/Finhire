@@ -1,0 +1,162 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  BUSINESS
+  EXPERT
+}
+
+enum ExpertType {
+  ACCOUNTANT
+  CFO
+  AR_REVENUE_SPECIALIST
+  OTHER
+}
+
+enum QuoteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum EngagementStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum NotificationType {
+  QUOTE_REQUEST_RECEIVED
+  QUOTE_ACCEPTED
+  QUOTE_DECLINED
+  ENGAGEMENT_STARTED
+  ENGAGEMENT_COMPLETED
+  NEW_REVIEW
+}
+
+model User {
+  id            String         @id @db.Uuid
+  name          String
+  email         String         @unique
+  passwordHash  String         @map("password_hash")
+  role          UserRole
+  location      String?
+  createdAt     DateTime       @default(now()) @map("created_at")
+  expertProfile ExpertProfile?
+  reviewsGiven  Review[]       @relation("BusinessReviews")
+  reviewsGot    Review[]       @relation("ExpertReviews")
+  quoteRequests QuoteRequest[] @relation("BusinessQuotes")
+  quoteLeads    QuoteRequest[] @relation("ExpertQuotes")
+  proposals     Proposal[]
+  engagementsAsBusiness Engagement[] @relation("BusinessEngagements")
+  engagementsAsExpert   Engagement[] @relation("ExpertEngagements")
+  favoritesAsBusiness   Favorite[]   @relation("FavoriteBusiness")
+  favoritesAsExpert     Favorite[]   @relation("FavoriteExpert")
+  notifications         Notification[]
+
+  @@map("users")
+}
+
+model ExpertProfile {
+  userId           String    @id @map("user_id") @db.Uuid
+  title            String
+  expertType       ExpertType @map("expert_type")
+  yearsExperience  Int       @default(0) @map("years_experience")
+  hourlyRate       Decimal?  @map("hourly_rate") @db.Decimal(10, 2)
+  bio              String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("expert_profiles")
+}
+
+model Review {
+  id             String   @id @db.Uuid
+  businessUserId String   @map("business_user_id") @db.Uuid
+  expertUserId   String   @map("expert_user_id") @db.Uuid
+  engagementId   String   @unique @map("engagement_id") @db.Uuid
+  rating         Int
+  comment        String?
+  createdAt      DateTime @default(now()) @map("created_at")
+  businessUser   User     @relation("BusinessReviews", fields: [businessUserId], references: [id], onDelete: Cascade)
+  expertUser     User     @relation("ExpertReviews", fields: [expertUserId], references: [id], onDelete: Cascade)
+  engagement     Engagement @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+
+  @@unique([businessUserId, expertUserId])
+  @@map("reviews")
+}
+
+model QuoteRequest {
+  id            String     @id @db.Uuid
+  businessUserId String    @map("business_user_id") @db.Uuid
+  expertUserId   String    @map("expert_user_id") @db.Uuid
+  projectDetails String    @map("project_details")
+  budget         Decimal?  @db.Decimal(12, 2)
+  timeline       String?   // e.g., "2 weeks", "1 month"
+  status         QuoteStatus @default(PENDING)
+  createdAt      DateTime  @default(now()) @map("created_at")
+  businessUser   User      @relation("BusinessQuotes", fields: [businessUserId], references: [id], onDelete: Cascade)
+  expertUser     User      @relation("ExpertQuotes", fields: [expertUserId], references: [id], onDelete: Cascade)
+  proposal       Proposal?
+
+  @@map("quote_requests")
+}
+model Proposal {
+  id             String   @id @db.Uuid
+  quoteRequestId String   @unique @map("quote_request_id") @db.Uuid
+  expertUserId   String   @map("expert_user_id") @db.Uuid
+  price          Decimal  @db.Decimal(12, 2)
+  timeline       String
+  message        String?
+  createdAt      DateTime @default(now()) @map("created_at")
+  quoteRequest   QuoteRequest @relation(fields: [quoteRequestId], references: [id], onDelete: Cascade)
+  expertUser     User         @relation(fields: [expertUserId], references: [id], onDelete: Cascade)
+  engagement     Engagement?
+
+  @@map("proposals")
+}
+
+model Engagement {
+  id             String   @id @db.Uuid
+  businessUserId String   @map("business_user_id") @db.Uuid
+  expertUserId   String   @map("expert_user_id") @db.Uuid
+  proposalId     String   @unique @map("proposal_id") @db.Uuid
+  status         EngagementStatus @default(ACTIVE)
+  startedAt      DateTime @default(now()) @map("started_at")
+  completedAt    DateTime? @map("completed_at")
+  businessUser   User     @relation("BusinessEngagements", fields: [businessUserId], references: [id], onDelete: Cascade)
+  expertUser     User     @relation("ExpertEngagements", fields: [expertUserId], references: [id], onDelete: Cascade)
+  proposal       Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  review         Review?
+
+  @@map("engagements")
+}
+
+model Favorite {
+  id           String @id @db.Uuid
+  businessUserId String @map("business_user_id") @db.Uuid
+  expertUserId String @map("expert_user_id") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at")
+  businessUser User   @relation("FavoriteBusiness", fields: [businessUserId], references: [id], onDelete: Cascade)
+  expertUser   User   @relation("FavoriteExpert", fields: [expertUserId], references: [id], onDelete: Cascade)
+
+  @@unique([businessUserId, expertUserId])
+  @@map("favorites")
+}
+
+model Notification {
+  id         String   @id @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  type       NotificationType
+  message    String
+  isRead     Boolean  @default(false) @map("is_read")
+  createdAt  DateTime @default(now()) @map("created_at")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
