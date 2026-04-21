@@ -76,6 +76,16 @@ export const EXPERT_PROFILE = gql`
       bio
       averageRating
       reviewCount
+      reviews {
+        id
+        rating
+        comment
+        createdAt
+        businessUser {
+          id
+          name
+        }
+      }
     }
   }
 `;
@@ -140,6 +150,18 @@ export const QUOTES_FOR_ME = gql`
       id
       businessUserId
       expertUserId
+      businessUser {
+        id
+        name
+        email
+        location
+      }
+      expertUser {
+        id
+        name
+        email
+        location
+      }
       projectDetails
       budget
       timeline
@@ -185,6 +207,10 @@ export const ENGAGEMENTS_FOR_ME = gql`
         rating
         comment
         createdAt
+      }
+      expertUser {
+        id
+        name
       }
     }
   }

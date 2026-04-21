@@ -9,7 +9,6 @@ import { ExpertProfilePage } from "./pages/ExpertProfilePage";
 import { LoginPage } from "./pages/LoginPage";
 import { QuotesPage } from "./pages/QuotesPage";
 import { RegisterPage } from "./pages/RegisterPage";
-import { ReviewsPage } from "./pages/ReviewsPage";
 import { SearchPage } from "./pages/SearchPage";
 import { getRole } from "./auth/session";
 
@@ -81,17 +80,6 @@ function App() {
             <RequireAuth>
               <RequireExpertProfile>
                 <EngagementsPage />
-              </RequireExpertProfile>
-            </RequireAuth>
-          }
-        />
-
-        <Route
-          path="/reviews"
-          element={
-            <RequireAuth>
-              <RequireExpertProfile>
-                <ReviewsPage />
               </RequireExpertProfile>
             </RequireAuth>
           }

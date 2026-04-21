@@ -21,7 +21,6 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/quotes", label: "Quotes", role: "BUSINESS" },
   { to: "/engagements", label: "Engagements", role: "BUSINESS" },
   { to: "/engagements", label: "Engagements", role: "EXPERT" },
-  { to: "/reviews", label: "Reviews", role: "BUSINESS" },
 ];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────

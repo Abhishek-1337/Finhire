@@ -126,9 +126,24 @@ export function QuotesPage() {
                     <div className="space-y-1">
                       <p className="text-sm font-semibold text-slate-900">Status: {quote.status}</p>
                       <p className="text-sm text-slate-500">
-                        {role === "BUSINESS"
-                          ? `Expert ID: ${quote.expertUserId}`
-                          : `Client ID: ${quote.businessUserId}`}
+                        {role === "BUSINESS" ? (
+                          <>
+                            Expert:{" "}
+                            <Link to={`/experts/${quote.expertUserId}`} className="font-medium text-sky-700 hover:underline">
+                              {quote.expertUser?.name ?? quote.expertUserId}
+                            </Link>
+                          </>
+                        ) : (
+                          <>
+                            Client:{" "}
+                            <span className="font-medium text-slate-700">
+                              {quote.businessUser?.name ?? quote.businessUserId}
+                            </span>
+                            {quote.businessUser?.email ? (
+                              <span className="text-slate-400"> • {quote.businessUser.email}</span>
+                            ) : null}
+                          </>
+                        )}
                       </p>
                       {quote.timeline && <p className="text-sm text-slate-500">Timeline: {quote.timeline}</p>}
                     </div>

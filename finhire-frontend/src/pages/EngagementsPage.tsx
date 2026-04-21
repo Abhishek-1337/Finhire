@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "@apollo/client/react";
 import { getRole } from "../auth/session";
 import { ENGAGEMENTS_FOR_ME, COMPLETE_ENGAGEMENT, ADD_REVIEW } from "../graphql/documents";
 import { getGraphqlErrorMessage } from "../utils/graphqlErrors";
+import { Link } from "react-router-dom";
 
 export function EngagementsPage() {
   const role = getRole();
@@ -14,6 +15,9 @@ export function EngagementsPage() {
   const engagements = useQuery(ENGAGEMENTS_FOR_ME, { fetchPolicy: "cache-and-network" });
   const [completeEngagement, { loading: completing }] = useMutation(COMPLETE_ENGAGEMENT);
   const [addReview, { loading: reviewing }] = useMutation(ADD_REVIEW);
+
+
+  console.log(engagements.data);
 
   const handleCompleteEngagement = async (engagementId: string) => {
     setError("");
@@ -81,9 +85,26 @@ export function EngagementsPage() {
                     <div className="space-y-1">
                       <p className="text-sm font-semibold text-slate-900">Status: {engagement.status}</p>
                       <p className="text-sm text-slate-500">
-                        {role === "BUSINESS"
-                          ? `Expert ID: ${engagement.expertUserId}`
-                          : `Client ID: ${engagement.businessUserId}`}
+                        {
+                        role === "BUSINESS"
+                          ? (
+                            <>
+                              Expert ID:{" "}
+                              <Link to={`/experts/${engagement.expertUserId}`} className="font-medium text-sky-700 hover:underline">
+                               {engagement.expertUser?.name}
+                              </Link>
+                            </>
+                            )
+                          : (
+                              <>
+                                Client ID: {" "}
+                                <Link to={`/experts/${engagement.expertUserId}`} className="font-medium text-sky-700 hover:underline">
+                                  Client ID: {engagement.expertUser?.name}
+                                </Link>
+                              </>
+                            )
+                        }
+
                       </p>
                       <p className="text-sm text-slate-500">Started: {new Date(engagement.startedAt).toLocaleDateString()}</p>
                       {engagement.completedAt && (

@@ -226,9 +226,6 @@ export function ExpertProfilePage() {
             <h1 className="text-2xl font-semibold tracking-tight">Expert Profile</h1>
             <p className="text-sm text-muted-foreground">
               Businesses find you through search.{" "}
-              <Link to="/" className="font-medium text-violet-600 hover:underline underline-offset-4">
-                Back to search
-              </Link>
             </p>
           </div>
 
@@ -269,30 +266,57 @@ export function ExpertProfilePage() {
                       </Button>
                     </div>
 
-                    <div className="grid gap-4">
-                      <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                        <p className="text-sm text-slate-500">Bio</p>
-                        <p className="mt-3 text-sm leading-7 text-slate-700">{profile.bio}</p>
-                      </div>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="rounded-3xl border border-slate-200 bg-white p-5">
-                          <p className="text-sm text-slate-500">Hourly rate</p>
-                          <p className="mt-2 text-lg font-semibold text-slate-900">
-                            {profile.hourlyRate ? `$${profile.hourlyRate}/hr` : "Not set"}
-                          </p>
-                        </div>
-                        <div className="rounded-3xl border border-slate-200 bg-white p-5">
-                          <p className="text-sm text-slate-500">Rating</p>
-                          <p className="mt-2 text-lg font-semibold text-slate-900">
-                            {profile.averageRating.toFixed(1)} ★
-                          </p>
-                          <p className="text-sm text-slate-500">{profile.reviewCount} review{profile.reviewCount === 1 ? "" : "s"}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
+	                    <div className="grid gap-4">
+	                      <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+	                        <p className="text-sm text-slate-500">Bio</p>
+	                        <p className="mt-3 text-sm leading-7 text-slate-700">{profile.bio}</p>
+	                      </div>
+	                      <div className="grid gap-4 sm:grid-cols-2">
+	                        <div className="rounded-3xl border border-slate-200 bg-white p-5">
+	                          <p className="text-sm text-slate-500">Hourly rate</p>
+	                          <p className="mt-2 text-lg font-semibold text-slate-900">
+	                            {profile.hourlyRate ? `$${profile.hourlyRate}/hr` : "Not set"}
+	                          </p>
+	                        </div>
+	                        <div className="rounded-3xl border border-slate-200 bg-white p-5">
+	                          <p className="text-sm text-slate-500">Rating</p>
+	                          <p className="mt-2 text-lg font-semibold text-slate-900">
+	                            {profile.averageRating.toFixed(1)} ★
+	                          </p>
+	                          <p className="text-sm text-slate-500">{profile.reviewCount} review{profile.reviewCount === 1 ? "" : "s"}</p>
+	                        </div>
+	                      </div>
+
+	                      <div className="rounded-3xl border border-slate-200 bg-white p-5">
+	                        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">Reviews</p>
+	                        {profile.reviews?.length ? (
+	                          <div className="mt-4 grid gap-3">
+	                            {profile.reviews.map((review: any) => (
+	                              <div key={review.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+	                                <div className="flex flex-wrap items-center justify-between gap-2">
+	                                  <p className="text-sm font-semibold text-slate-900">
+	                                    {review.businessUser?.name ?? "Business"}
+	                                  </p>
+	                                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+	                                    {review.rating}/5 • {new Date(review.createdAt).toLocaleDateString()}
+	                                  </p>
+	                                </div>
+	                                {review.comment ? (
+	                                  <p className="mt-2 text-sm text-slate-700 leading-6">{review.comment}</p>
+	                                ) : (
+	                                  <p className="mt-2 text-sm text-slate-500">No comment</p>
+	                                )}
+	                              </div>
+	                            ))}
+	                          </div>
+	                        ) : (
+	                          <p className="mt-3 text-sm text-slate-500">No reviews yet.</p>
+	                        )}
+	                      </div>
+	                    </div>
+	                  </CardContent>
+	                </Card>
+	              ) : (
                 <Card className="shadow-sm">
                   <CardContent className="pt-6">
                     <form onSubmit={formik.handleSubmit} noValidate className="space-y-5">

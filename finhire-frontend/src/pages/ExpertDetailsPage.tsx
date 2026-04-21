@@ -116,6 +116,33 @@ export function ExpertDetailsPage() {
             <p className="mt-3 text-sm leading-7 text-slate-700">{expertProfile.bio}</p>
           </div>
         ) : null}
+
+        <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-5">
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">Reviews</p>
+          {expertProfile?.reviews?.length ? (
+            <div className="mt-4 grid gap-3">
+              {expertProfile.reviews.map((review: any) => (
+                <div key={review.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-sm font-semibold text-slate-900">
+                      {review.businessUser?.name ?? "Business"}
+                    </p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      {review.rating}/5 • {new Date(review.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  {review.comment ? (
+                    <p className="mt-2 text-sm text-slate-700 leading-6">{review.comment}</p>
+                  ) : (
+                    <p className="mt-2 text-sm text-slate-500">No comment</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-3 text-sm text-slate-500">No reviews yet.</p>
+          )}
+        </div>
       </section>
 
       <section className="rounded-[28px] border border-slate-200 bg-slate-50 p-6 shadow-sm">
@@ -168,4 +195,3 @@ export function ExpertDetailsPage() {
 }
 
 export default ExpertDetailsPage;
-

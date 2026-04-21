@@ -52,6 +52,7 @@ export const typeDefs = gql`
     bio: String!
     averageRating: Float!
     reviewCount: Int!
+    reviews: [Review!]!
   }
 
   type Review {
@@ -62,6 +63,7 @@ export const typeDefs = gql`
     rating: Int!
     comment: String
     createdAt: String!
+    businessUser: User!
   }
 
   type QuoteRequest {
@@ -74,6 +76,8 @@ export const typeDefs = gql`
     status: QuoteStatus!
     createdAt: String!
     proposal: Proposal
+    businessUser: User!
+    expertUser: User!
   }
 
   type Proposal {
@@ -95,6 +99,7 @@ export const typeDefs = gql`
     startedAt: String!
     completedAt: String
     review: Review
+    expertUser: User
   }
 
   type Favorite {

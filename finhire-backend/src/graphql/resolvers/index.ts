@@ -59,6 +59,64 @@ const getExpertProfileByUserId = async (ctx: GraphQLContext, userId: string) => 
 };
 
 export const resolvers = {
+  ExpertProfile: {
+    reviews: async (parent: { user: { id: string } }, _: unknown, ctx: GraphQLContext) => {
+      const reviews = await ctx.db.review.findMany({
+        where: { expertUserId: parent.user.id },
+        orderBy: { createdAt: "desc" },
+        include: { businessUser: true },
+        take: 20,
+      });
+
+      return reviews.map((r: any) => ({
+        id: r.id,
+        businessUserId: r.businessUserId,
+        expertUserId: r.expertUserId,
+        engagementId: r.engagementId,
+        rating: r.rating,
+        comment: r.comment,
+        createdAt: r.createdAt.toISOString(),
+        businessUser: r.businessUser,
+      }));
+    },
+  },
+
+  Review: {
+    businessUser: async (
+      parent: { businessUserId: string; businessUser?: AppUser },
+      _: unknown,
+      ctx: GraphQLContext,
+    ) => {
+      if (parent.businessUser) return mapUser(parent.businessUser);
+      const user = await ctx.db.user.findUnique({ where: { id: parent.businessUserId } });
+      if (!user) throw new Error("User not found");
+      return mapUser(user);
+    },
+  },
+
+  QuoteRequest: {
+    businessUser: async (
+      parent: { businessUserId: string; businessUser?: AppUser },
+      _: unknown,
+      ctx: GraphQLContext,
+    ) => {
+      if (parent.businessUser) return mapUser(parent.businessUser);
+      const user = await ctx.db.user.findUnique({ where: { id: parent.businessUserId } });
+      if (!user) throw new Error("User not found");
+      return mapUser(user);
+    },
+    expertUser: async (
+      parent: { expertUserId: string; expertUser?: AppUser },
+      _: unknown,
+      ctx: GraphQLContext,
+    ) => {
+      if (parent.expertUser) return mapUser(parent.expertUser);
+      const user = await ctx.db.user.findUnique({ where: { id: parent.expertUserId } });
+      if (!user) throw new Error("User not found");
+      return mapUser(user);
+    },
+  },
+
   Query: {
     me: async (_: unknown, __: unknown, ctx: GraphQLContext) => {
       const auth = requireAuth(ctx);
@@ -141,13 +199,15 @@ export const resolvers = {
             ? { businessUserId: auth.userId }
             : { expertUserId: auth.userId },
         orderBy: { createdAt: "desc" },
-        include: { proposal: true },
+        include: { proposal: true, businessUser: true, expertUser: true },
       });
 
       return quotes.map((q: any) => ({
         id: q.id,
         businessUserId: q.businessUserId,
         expertUserId: q.expertUserId,
+        businessUser: q.businessUser,
+        expertUser: q.expertUser,
         projectDetails: q.projectDetails,
         budget: q.budget ? Number(q.budget) : null,
         timeline: q.timeline,
@@ -193,16 +253,20 @@ export const resolvers = {
             ? { businessUserId: auth.userId }
             : { expertUserId: auth.userId },
         orderBy: { startedAt: "desc" },
-        include: { review: true },
+        include: { review: true, expertUser: true },
       });
 
       return engagements.map((e: any) => ({
         id: e.id,
-        businessUserId: e.businessUserId,
+        businessUserId: e.businessUserId ,
         expertUserId: e.expertUserId,
         proposalId: e.proposalId,
         status: e.status,
         startedAt: e.startedAt.toISOString(),
+        expertUser: e.expertUser ? {  
+          id: e.expertUser.id,  
+          name: e.expertUser.name,
+        }: null,
         completedAt: e.completedAt?.toISOString() || null,
         review: e.review ? {
           id: e.review.id,
