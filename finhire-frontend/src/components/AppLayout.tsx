@@ -225,7 +225,7 @@ export function AppLayout() {
 
           {/* Desktop session */}
           <div className="hidden lg:flex items-center gap-3 shrink-0">
-            <SessionBadge token={token} role={role} />
+            {/* <SessionBadge token={token} role={role} /> */}
             {token && <LogoutButton onClick={handleLogout} />}
           </div>
 
@@ -276,7 +276,7 @@ export function AppLayout() {
         ))}
 
         <div className="mt-6 flex flex-col gap-3">
-          <SessionBadge token={token} role={role} />
+          {/* <SessionBadge token={token} role={role} /> */}
           {token && <LogoutButton onClick={handleLogout} />}
         </div>
       </nav>
