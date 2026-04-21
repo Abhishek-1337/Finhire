@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { clearSession, getRole, getToken } from "../auth/session";
 import { cn } from "../utils/twMerge";
+import { useQuery } from "@apollo/client/react";
+import { EXPERT_PROFILE, ME } from "../graphql/documents";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -114,6 +116,7 @@ export function AppLayout() {
   const location = useLocation();
   const token = getToken();
   const role = getRole();
+  const isExpert = role === "EXPERT" && !!token;
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -131,7 +134,32 @@ export function AppLayout() {
   };
 
   const userRole = getRole();
-  const filteredNavItems = NAV_ITEMS.filter(item => item.role === userRole);
+
+  const { data: meData } = useQuery<{ me: { id: string } }>(ME, {
+    fetchPolicy: "cache-first",
+    skip: !isExpert,
+  });
+
+  const userId = meData?.me?.id;
+
+  const { data: expertProfileData, loading: expertProfileLoading, error: expertProfileError } =
+    useQuery<{ expertProfile: unknown }>(EXPERT_PROFILE, {
+      variables: { userId },
+      fetchPolicy: "cache-first",
+      skip: !isExpert || !userId,
+    });
+
+  const hasExpertProfile = !!expertProfileData?.expertProfile;
+
+  const filteredNavItems = NAV_ITEMS.filter((item) => {
+    if (item.role !== userRole) return false;
+    if (userRole !== "EXPERT") return true;
+    if (item.to === "/profile") return true;
+
+    // Until the expert profile exists (or if it fails to load), hide other routes from the nav.
+    if (expertProfileLoading || expertProfileError) return false;
+    return hasExpertProfile;
+  });
 
   return (
     <div
@@ -151,7 +179,7 @@ export function AppLayout() {
       {/* ── Header ── */}
       <header
         className={cn(
-          "sticky top-0 z-50 h-16 relative",
+          "sticky top-0 z-50 h-16 ",
           "bg-white/95 backdrop-blur-md",
           "border-b border-slate-200 transition-all duration-200",
           scrolled && "shadow-sm border-b-slate-200"
@@ -226,7 +254,7 @@ export function AppLayout() {
           menuOpen ? "flex" : "hidden"
         )}
       >
-        {NAV_ITEMS.map(({ to, label, end }) => (
+        {filteredNavItems.map(({ to, label, end }) => (
           <NavLink
             key={to}
             to={to}

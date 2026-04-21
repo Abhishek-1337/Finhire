@@ -1,45 +1,48 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { AppLayout } from "./components/AppLayout";
 import { GuestOnly } from "./components/GuestOnly";
 import { RequireAuth } from "./components/RequireAuth";
+import { RequireExpertProfile } from "./components/RequireExpertProfile";
 import { EngagementsPage } from "./pages/EngagementsPage";
+import { ExpertDetailsPage } from "./pages/ExpertDetailsPage";
 import { ExpertProfilePage } from "./pages/ExpertProfilePage";
 import { LoginPage } from "./pages/LoginPage";
 import { QuotesPage } from "./pages/QuotesPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ReviewsPage } from "./pages/ReviewsPage";
 import { SearchPage } from "./pages/SearchPage";
-import { useEffect, useState } from "react";
+import { getRole } from "./auth/session";
 
 function App() {
-  const [role, setRole] = useState<string | null>(null);
-  useEffect(()  => {
-    const userRole = localStorage.getItem("userRole");
-    setRole(userRole);
-  }, []);
+  const role = getRole();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  if(location.pathname === "/" && role === null) {
+    navigate("/login");
+  }
   return (
     <Routes>
       <Route
-          path="/register"
-          element={
-            <GuestOnly>
-              <RegisterPage />
-            </GuestOnly>
-          }
-        />
-
-        <Route
-          path="/login"
-          element={
-            <GuestOnly>
-              <LoginPage />
-            </GuestOnly>
-          }
-        />
-      <Route element={<AppLayout />}>
-        {
-          role === "BUSINESS" && <Route index element={<SearchPage />} />
+        path="/register"
+        element={
+          <GuestOnly>
+            <RegisterPage />
+          </GuestOnly>
         }
+      />
+
+      <Route
+        path="/login"
+        element={
+          <GuestOnly>
+            <LoginPage />
+          </GuestOnly>
+        }
+      />
+      <Route element={<AppLayout />}>
+        {role === "BUSINESS" && <Route index element={<SearchPage />} />}
+        {role === "EXPERT" && <Route index element={<Navigate to="/quotes" replace />} />}
 
         
 
@@ -53,10 +56,21 @@ function App() {
         />
 
         <Route
+          path="/experts/:expertUserId"
+          element={
+            <RequireAuth>
+              <ExpertDetailsPage />
+            </RequireAuth>
+          }
+        />
+
+        <Route
           path="/quotes"
           element={
             <RequireAuth>
-              <QuotesPage />
+              <RequireExpertProfile>
+                <QuotesPage />
+              </RequireExpertProfile>
             </RequireAuth>
           }
         />
@@ -65,7 +79,9 @@ function App() {
           path="/engagements"
           element={
             <RequireAuth>
-              <EngagementsPage />
+              <RequireExpertProfile>
+                <EngagementsPage />
+              </RequireExpertProfile>
             </RequireAuth>
           }
         />
@@ -74,7 +90,9 @@ function App() {
           path="/reviews"
           element={
             <RequireAuth>
-              <ReviewsPage />
+              <RequireExpertProfile>
+                <ReviewsPage />
+              </RequireExpertProfile>
             </RequireAuth>
           }
         />

@@ -17,6 +17,7 @@ import { FormField } from "../components/ui/FormField";
 import { HeroPanel } from "../components/layout/HeroPanel";
 import { RegisterSchema, type RegisterFormValues } from "../utils/validation";
 import { RoleToggle } from "../components/ui/RoleToggle";
+import { setSession } from "../auth/session";
 
 export function RegisterPage() {
   const navigate = useNavigate();
@@ -36,7 +37,7 @@ export function RegisterPage() {
     onSubmit: async (values, { setSubmitting }) => {
       setServerError("");
       try {
-        await register({
+        const res: any = await register({
           variables: {
             input: {
               name: values.name,
@@ -48,7 +49,9 @@ export function RegisterPage() {
           },
         });
 
-        navigate("/login", {
+        setSession(res.data.register.token, res.data.register.user.role);
+
+        navigate("/profile", {
           replace: true,
           state: {
             email: values.email,

@@ -1,5 +1,6 @@
 import { useMemo, useState, type ChangeEvent } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
+import { Link } from "react-router-dom";
 import { SEARCH_EXPERTS, TOGGLE_FAVORITE, FAVORITES_FOR_ME } from "../graphql/documents";
 import { CountryDropdown } from "../components/ui/Auth/CountryDropdown";
 
@@ -154,6 +155,14 @@ export function SearchPage() {
                       <p>{expert.yearsExperience} years experience</p>
                       <p>{expert.reviewCount} reviews</p>
                       <p>{expert.bio}</p>
+                    </div>
+                    <div className="mt-4 flex flex-wrap gap-3">
+                      <Link
+                        to={`/experts/${expert.user.id}`}
+                        className="inline-flex items-center justify-center rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700"
+                      >
+                        View profile & request quote
+                      </Link>
                     </div>
                   </article>
                 ))

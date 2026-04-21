@@ -42,12 +42,9 @@ export function LoginPage() {
           },
         });
 
-        console.log(res);
-
-
         setSession(res.data.login.token, res.data.login.user.role);
 
-        navigate("/", {
+        navigate("/seach", {
           replace: true,
           state: {
             email: values.email,
@@ -132,7 +129,7 @@ export function LoginPage() {
                   />
                 </FormField>
 
-                {serverError && <Alert message={serverError} />}
+                {serverError && <Alert message={"Something went wrong."} />}
 
                 <Button
                   type="submit"
