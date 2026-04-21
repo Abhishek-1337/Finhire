@@ -364,6 +364,8 @@ export const resolvers = {
           timeline: input.timeline ?? null,
         },
       });
+      const user = await ctx.db.user.findUnique({ where: { id: auth.userId } });
+      if(!user) throw new Error("User not found");
 
       // Create notification for expert
       await ctx.db.notification.create({
@@ -371,7 +373,7 @@ export const resolvers = {
           id: randomUUID(),
           userId: input.expertUserId,
           type: "QUOTE_REQUEST_RECEIVED",
-          message: `New quote request from ${auth.name}`,
+          message: `New quote request from ${user.name}`,
         },
       });
 
@@ -419,13 +421,16 @@ export const resolvers = {
         },
       });
 
+       const user = await ctx.db.user.findUnique({ where: { id: auth.userId } });
+      if(!user) throw new Error("User not found");
+
       // Create notification for expert
       await ctx.db.notification.create({
         data: {
           id: randomUUID(),
           userId: engagement.expertUserId,
           type: "NEW_REVIEW",
-          message: `New review from ${auth.name}`,
+          message: `New review from ${user.name}`,
         },
       });
 
@@ -463,6 +468,9 @@ export const resolvers = {
         data: { status },
       });
 
+       const user = await ctx.db.user.findUnique({ where: { id: auth.userId } });
+      if(!user) throw new Error("User not found");
+
       // Create notification for business
       const notificationType = status === "ACCEPTED" ? "QUOTE_ACCEPTED" : status === "DECLINED" ? "QUOTE_DECLINED" : "QUOTE_REQUEST_RECEIVED";
       await ctx.db.notification.create({
@@ -470,7 +478,7 @@ export const resolvers = {
           id: randomUUID(),
           userId: existing.businessUserId,
           type: notificationType,
-          message: `Quote request ${status.toLowerCase()} by ${auth.name}`,
+          message: `Quote request ${status.toLowerCase()} by ${user.name}`,
         },
       });
 
@@ -553,13 +561,16 @@ export const resolvers = {
         },
       });
 
+       const user = await ctx.db.user.findUnique({ where: { id: auth.userId } });
+      if(!user) throw new Error("User not found");
+
       // Create notification for expert
       await ctx.db.notification.create({
         data: {
           id: randomUUID(),
           userId: proposal.expertUserId,
           type: "ENGAGEMENT_STARTED",
-          message: `New engagement started with ${auth.name}`,
+          message: `New engagement started with ${user.name}`,
         },
       });
 
@@ -595,13 +606,16 @@ export const resolvers = {
         data: { status: "COMPLETED", completedAt: new Date() },
       });
 
+      const user = await ctx.db.user.findUnique({ where: { id: auth.userId } });
+      if(!user) throw new Error("User not found");
+
       // Create notification for expert
       await ctx.db.notification.create({
         data: {
           id: randomUUID(),
           userId: engagement.expertUserId,
           type: "ENGAGEMENT_COMPLETED",
-          message: `Engagement completed by ${auth.name}`,
+          message: `Engagement completed by ${user.name}`,
         },
       });
 
