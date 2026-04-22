@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { clearSession, getRole, getToken } from "../auth/session";
 import { cn } from "../utils/twMerge";
-import { useQuery } from "@apollo/client/react";
-import { EXPERT_PROFILE, ME } from "../graphql/documents";
+import { useQuery, useMutation } from "@apollo/client/react";
+import { EXPERT_PROFILE, ME, NOTIFICATIONS_FOR_ME, MARK_NOTIFICATION_READ } from "../graphql/documents";
+import { Bell } from "lucide-react";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -16,6 +17,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [  
   { to: "/", label: "Search", end: true, role: "BUSINESS" },
+  { to: "/ai-search", label: "AI Search", role: "BUSINESS" },
   { to: "/profile", label: "Expert Profile", role: "EXPERT" },
   { to: "/quotes", label: "Quotes", role: "EXPERT" },
   { to: "/quotes", label: "Quotes", role: "BUSINESS" },
@@ -50,13 +52,12 @@ function BrandMark() {
   );
 }
 
-function SessionBadge({ token, role }: { token: string | null; role: string | null }) {
+function SessionBadge({ token, role, username }: { token: string | null; role: string | null; username: string | null }) {
   if (token) {
     return (
       <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-slate-500">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.4)] shrink-0" />
-        {role && <span className="text-sky-700 font-medium">{role}</span>}
-        <span>signed in</span>
+        <span>{username}</span>
       </div>
     );
   }
@@ -134,10 +135,30 @@ export function AppLayout() {
 
   const userRole = getRole();
 
-  const { data: meData } = useQuery<{ me: { id: string } }>(ME, {
+  const { data: meData } = useQuery<{ me: { id: string; name: string } }>(ME, {
     fetchPolicy: "cache-first",
-    skip: !isExpert,
+    // skip: !isExpert,
   });
+
+  const { data: notificationsData, refetch: refetchNotifications } = useQuery<{ notificationsForMe: any[] }>(
+    NOTIFICATIONS_FOR_ME,
+    { fetchPolicy: "cache-and-network", skip: !token }
+  );
+
+  const [markNotificationRead] = useMutation(MARK_NOTIFICATION_READ);
+
+  const notifications = notificationsData?.notificationsForMe ?? [];
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const [notifOpen, setNotifOpen] = useState(false);
+
+  const handleMarkRead = async (id: string) => {
+    try {
+      await markNotificationRead({ variables: { notificationId: id } });
+      await refetchNotifications();
+    } catch (err) {
+      // ignore - UI best-effort
+    }
+  };
 
   const userId = meData?.me?.id;
 
@@ -147,7 +168,6 @@ export function AppLayout() {
       fetchPolicy: "cache-first",
       skip: !isExpert || !userId,
     });
-
   const hasExpertProfile = !!expertProfileData?.expertProfile;
 
   const filteredNavItems = NAV_ITEMS.filter((item) => {
@@ -223,9 +243,64 @@ export function AppLayout() {
             </ul>
           </nav>
 
-          {/* Desktop session */}
-          <div className="hidden lg:flex items-center gap-3 shrink-0">
-            {/* <SessionBadge token={token} role={role} /> */}
+
+          {/* Desktop session + notifications */}
+          <div className="hidden lg:flex items-center gap-3 shrink-0 relative">
+            {token && (
+              <div className="relative">
+                <button
+                  type="button"
+                  aria-label="Notifications"
+                  onClick={() => setNotifOpen((o) => !o)}
+                  className="relative inline-flex items-center justify-center rounded-full p-2 hover:bg-slate-100"
+                >
+                  <Bell className="w-4 h-4 text-slate-600" />
+                  {unreadCount > 0 ? (
+                    <span className="absolute -top-1 -right-1 inline-flex items-center justify-center rounded-full bg-rose-600 text-white text-[10px] px-1 py-0.2">
+                      {unreadCount}
+                    </span>
+                  ) : null}
+                </button>
+
+                {notifOpen ? (
+                  <div className="absolute right-0 mt-2 w-80 rounded-md border border-slate-200 bg-white shadow-lg z-50">
+                    <div className="p-3 border-b border-slate-100 text-sm font-semibold">Notifications</div>
+                    <div className="max-h-64 overflow-y-auto">
+                      {notifications.length ? (
+                        notifications.map((n: any) => (
+                          <div
+                            key={n.id}
+                            className={cn(
+                              "p-3 text-sm border-b border-slate-100",
+                              !n.isRead ? "bg-slate-50" : "bg-white"
+                            )}
+                          >
+                            <div className="flex justify-between items-start gap-2">
+                              <div className="text-slate-700">{n.message}</div>
+                              <div className="text-xs text-slate-400">{new Date(n.createdAt).toLocaleString()}</div>
+                            </div>
+                            {!n.isRead ? (
+                              <div className="mt-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleMarkRead(n.id)}
+                                  className="text-xs text-sky-700 hover:underline"
+                                >
+                                  Mark read
+                                </button>
+                              </div>
+                            ) : null}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="p-3 text-sm text-slate-500">No notifications</div>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            )}
+            <SessionBadge token={token} role={role} username={meData?.me.name.split(" ")[0] ?? null}/>
             {token && <LogoutButton onClick={handleLogout} />}
           </div>
 

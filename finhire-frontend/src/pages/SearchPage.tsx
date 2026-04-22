@@ -25,21 +25,32 @@ export function SearchPage() {
       if (Number.isFinite(minYearsExperience)) filters.minYearsExperience = minYearsExperience;
     }
 
-    return { filters };
+    return Object.keys(filters).length > 0 ? { filters } : {};
   }, [searchLocation, searchExpertType, searchMinRating, searchMinExperience]);
 
   const search = useQuery(SEARCH_EXPERTS, { variables: filterVariables });
   const favorites = useQuery(FAVORITES_FOR_ME);
   const [toggleFavorite] = useMutation(TOGGLE_FAVORITE);
-  const experts = (search.data as any)?.searchExperts ?? [];
-  const favoriteIds = new Set((favorites.data as any)?.favoritesForMe?.map((f: any) => f.expertUserId) ?? []);
+  const allExperts = (search.data as any)?.searchExperts ?? [];
+  console.log(allExperts);
 
-  const handleToggleFavorite = async (expertUserId: string) => {
-    await toggleFavorite({
-      variables: { input: { expertUserId } },
-      refetchQueries: [{ query: FAVORITES_FOR_ME }],
+  const filteredExperts = useMemo(() => {
+    if (Object.keys(filterVariables).length === 0) return allExperts;
+
+    return allExperts.filter((expert: any) => {
+      if (searchLocation.trim() && !expert.user.location?.toLowerCase().includes(searchLocation.toLowerCase())) return false;
+      if (searchExpertType.trim() && expert.expertType !== searchExpertType) return false;
+      if (searchMinRating.trim()) {
+        const minRating = Number(searchMinRating);
+        if (Number.isFinite(minRating) && expert.averageRating < minRating) return false;
+      }
+      if (searchMinExperience.trim()) {
+        const minYears = Number(searchMinExperience);
+        if (Number.isFinite(minYears) && expert.yearsExperience < minYears) return false;
+      }
+      return true;
     });
-  };
+  }, [allExperts, searchLocation, searchExpertType, searchMinRating, searchMinExperience]);
 
   const handleCountryChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setSearchLocation(event.target.value);
@@ -66,7 +77,7 @@ export function SearchPage() {
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
           <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
             <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Available experts</p>
-            <p className="mt-3 text-2xl font-semibold text-slate-900">{experts.length}</p>
+            <p className="mt-3 text-2xl font-semibold text-slate-900">{allExperts.length}</p>
           </div>
           <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
             <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Best fit</p>
@@ -80,12 +91,12 @@ export function SearchPage() {
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
-        <section className="rounded-[28px] border border-slate-200 bg-slate-50 p-6 shadow-sm">
+        <section className="rounded-[28px] border border-slate-200 bg-slate-50 p-6 shadow-sm max-h-min">
           <div className="mb-6">
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">Refine filters</p>
             <h2 className="mt-2 text-xl font-semibold text-slate-950">Search criteria</h2>
           </div>
-          <div className="grid gap-4">
+          <div className="grid gap-4 ">
             <CountryDropdown value={searchLocation} onChange={handleCountryChange} />
             <select
               value={searchExpertType}
@@ -116,13 +127,6 @@ export function SearchPage() {
               min="0"
               className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
             />
-            <button
-              type="button"
-              onClick={() => search.refetch()}
-              className="inline-flex items-center justify-center rounded-full bg-sky-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700"
-            >
-              Search
-            </button>
           </div>
         </section>
 
@@ -131,15 +135,15 @@ export function SearchPage() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-sm font-medium text-slate-500">Search results</p>
-                <p className="mt-1 text-2xl font-semibold text-slate-900">{experts.length} experts found</p>
+                <p className="mt-1 text-2xl font-semibold text-slate-900">{filteredExperts.length} experts found</p>
               </div>
               {search.loading ? (
                 <span className="rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-600">Searching…</span>
               ) : null}
             </div>
             <div className="mt-6 grid gap-4">
-              {experts.length ? (
-                experts.map((expert: any) => (
+              {filteredExperts.length ? (
+                filteredExperts.map((expert: any) => (
                   <article key={expert.user.id} className="rounded-3xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                       <div>

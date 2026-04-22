@@ -72,6 +72,7 @@ export function QuotesPage() {
   };
 
   const quoteItems = (quotes.data as any)?.quotesForMe ?? [];
+  console.log(quoteItems);
 
   return (
     <>

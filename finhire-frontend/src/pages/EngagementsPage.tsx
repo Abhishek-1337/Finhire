@@ -99,7 +99,7 @@ export function EngagementsPage() {
                               <>
                                 Client ID: {" "}
                                 <Link to={`/experts/${engagement.expertUserId}`} className="font-medium text-sky-700 hover:underline">
-                                  Client ID: {engagement.expertUser?.name}
+                                  {engagement.expertUser?.name}
                                 </Link>
                               </>
                             )

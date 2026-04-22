@@ -3,6 +3,7 @@ import { AppLayout } from "./components/AppLayout";
 import { GuestOnly } from "./components/GuestOnly";
 import { RequireAuth } from "./components/RequireAuth";
 import { RequireExpertProfile } from "./components/RequireExpertProfile";
+import { AiSearchPage } from "./pages/AiSearchPage";
 import { EngagementsPage } from "./pages/EngagementsPage";
 import { ExpertDetailsPage } from "./pages/ExpertDetailsPage";
 import { ExpertProfilePage } from "./pages/ExpertProfilePage";
@@ -43,7 +44,14 @@ function App() {
         {role === "BUSINESS" && <Route index element={<SearchPage />} />}
         {role === "EXPERT" && <Route index element={<Navigate to="/quotes" replace />} />}
 
-        
+        <Route
+          path="/ai-search"
+          element={
+            <RequireAuth>
+              <AiSearchPage />
+            </RequireAuth>
+          }
+        />
 
         <Route
           path="/profile"

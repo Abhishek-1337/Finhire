@@ -3,6 +3,7 @@ import { typeDefs } from "./graphql/typeDefs/schema";
 import { resolvers } from "./graphql/resolvers";
 import { createContext } from "./graphql/context";
 import { env } from "./config/env";
+import { startAiServer } from "./aiSearch";
 
 async function startServer() {
   const server = new ApolloServer({
@@ -14,6 +15,8 @@ async function startServer() {
   const { url } = await server.listen({ port: env.PORT });
   // eslint-disable-next-line no-console
   console.log(`FinHire GraphQL API running at ${url}`);
+  // start AI endpoint server for receiving search strings
+  startAiServer();
 }
 
 startServer().catch((error) => {

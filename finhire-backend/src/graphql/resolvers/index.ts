@@ -121,6 +121,7 @@ export const resolvers = {
     me: async (_: unknown, __: unknown, ctx: GraphQLContext) => {
       const auth = requireAuth(ctx);
       const user = await ctx.db.user.findUnique({ where: { id: auth.userId } });
+      console.log("hello"+user);
       return user ? mapUser(user) : null;
     },
 
