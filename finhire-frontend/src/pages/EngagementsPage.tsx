@@ -4,6 +4,7 @@ import { getRole } from "../auth/session";
 import { ENGAGEMENTS_FOR_ME, COMPLETE_ENGAGEMENT, ADD_REVIEW } from "../graphql/documents";
 import { getGraphqlErrorMessage } from "../utils/graphqlErrors";
 import { Link } from "react-router-dom";
+import Review from "../components/ui/Review";
 
 export function EngagementsPage() {
   const role = getRole();
@@ -50,6 +51,10 @@ export function EngagementsPage() {
     } catch (err) {
       setError(getGraphqlErrorMessage(err));
     }
+  };
+
+  const handleReviewChange = (rating: number) => {  
+    setReviewRating(String(rating));
   };
 
   const engagementItems = (engagements.data as any)?.engagementsForMe ?? [];
@@ -133,17 +138,15 @@ export function EngagementsPage() {
                   ) : null}
                   {role === "BUSINESS" && engagement.status === "COMPLETED" && !engagement.review ? (
                     <div className="mt-4 space-y-3">
-                      <p className="text-sm font-semibold text-slate-900">Leave a Review</p>
+                      <div className="flex gap-4">
+                          <p className="text-sm font-semibold text-slate-900">Leave a Review</p>
+                          <Review
+                            value={Number(reviewRating)}
+                            onChange={handleReviewChange}
+                          />
+                      </div>
                       <div className="grid gap-2">
-                        <input
-                          value={reviewRating}
-                          onChange={(e) => setReviewRating(e.target.value)}
-                          placeholder="Rating (1-5)"
-                          type="number"
-                          min="1"
-                          max="5"
-                          className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
-                        />
+                        
                         <textarea
                           value={reviewComment}
                           onChange={(e) => setReviewComment(e.target.value)}
