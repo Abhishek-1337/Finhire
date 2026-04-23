@@ -30,7 +30,6 @@ export function LoginPage() {
     },
     validationSchema: LoginSchema,
     onSubmit: async (values, { setSubmitting }) => {
-      console.log(values);
       setServerError("");
       try {
         const res:any = await login({

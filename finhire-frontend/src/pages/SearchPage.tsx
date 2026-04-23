@@ -32,7 +32,6 @@ export function SearchPage() {
   const favorites = useQuery(FAVORITES_FOR_ME);
   const [toggleFavorite] = useMutation(TOGGLE_FAVORITE);
   const allExperts = (search.data as any)?.searchExperts ?? [];
-  console.log(allExperts);
 
   const filteredExperts = useMemo(() => {
     if (Object.keys(filterVariables).length === 0) return allExperts;

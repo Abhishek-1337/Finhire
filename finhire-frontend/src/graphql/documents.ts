@@ -238,6 +238,25 @@ export const NOTIFICATIONS_FOR_ME = gql`
   }
 `;
 
+export const SEARCH_EXPERTS_AI = gql`
+  query AiSearch($query: String!) {
+    aiSearch(query: $query) {
+      user {
+        id
+        name
+        location
+      }
+      title
+      expertType
+      yearsExperience
+      hourlyRate
+      bio
+      averageRating
+      reviewCount
+    }
+  }
+`;
+
 export const SUBMIT_PROPOSAL = gql`
   mutation SubmitProposal($input: ProposalInput!) {
     submitProposal(input: $input) {

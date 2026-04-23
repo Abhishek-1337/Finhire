@@ -1,61 +1,39 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useQuery } from "@apollo/client/react";
-import { SEARCH_EXPERTS } from "../graphql/documents";
+import { useLazyQuery, useQuery } from "@apollo/client/react";
+import { SEARCH_EXPERTS, SEARCH_EXPERTS_AI } from "../graphql/documents";
 
 export function AiSearchPage() {
   const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  // const [loading, setLoading] = useState(false);
+  const [lastSearch, setLastSearch] = useState("");
+  const [shouldFetch, setShouldFetch] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const aiUrl = import.meta.env.VITE_AI_SEARCH_URL ?? "http://localhost:4001/api/ai-search";
+  // const { data, loading, error: loadError} = useQuery(SEARCH_EXPERTS_AI, {
+  //   variables: { query },
+  //   skip: !shouldFetch
+  // });
 
-  // Get filters from AI search result if available
-  const aiSearchResult = (location.state as any)?.aiSearchResult;
-  const initialFilters = aiSearchResult?.structured || {};
-
-  // Use filters from AI result to search
-  const filterVariables = initialFilters.filters ? { filters: initialFilters.filters } : {};
-  const search = useQuery(SEARCH_EXPERTS, {
-    variables: filterVariables,
-    skip: !Object.keys(filterVariables).length,
-  });
+  const [getData, {data, loading, error: loadError}] = useLazyQuery( SEARCH_EXPERTS_AI);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!query.trim()) return;
-
-    setLoading(true);
-    setError("");
-    try {
-      const res = await fetch(aiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: query.trim() }),
-      });
-
-      if (!res.ok) {
-        throw new Error("AI search failed");
-      }
-
-      const data = await res.json();
-      // The response contains AI-structured filters. Apply them.
-      if (data.structured?.filters) {
-        // Refetch with new filters
-        const filterVars = { filters: data.structured.filters };
-        search.refetch(filterVars);
-      }
-      setQuery("");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Search failed");
-    } finally {
-      setLoading(false);
-    }
+    setShouldFetch(true);
   };
 
-  const allExperts = (search.data as any)?.searchExperts ?? [];
+  // useEffect(() => {
+  //   if(!loading) {
+  //     setShouldFetch(false);
+  //     setQuery("");
+  //   }
+  // }, [loading]);
+
+  console.log(data);
+
+
+  const allExperts = (data as any)?.aiSearch ?? [];
+  console.log(allExperts);
 
   return (
     <>
@@ -87,20 +65,27 @@ export function AiSearchPage() {
               type="submit"
               disabled={loading || !query.trim()}
               className="rounded-full bg-sky-600 px-6 py-3 text-sm font-semibold text-white hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-60"
+              onClick={() => {
+                getData({ variables: { query } });
+                setTimeout(() => {
+                  setLastSearch(query);
+                  setQuery("");
+                }, 3000);
+              }}
             >
               {loading ? "Searching…" : "Search"}
             </button>
           </div>
-          {error && <p className="text-sm text-rose-600">{error}</p>}
-          {aiSearchResult?.query && (
+          {loadError && <p className="text-sm text-rose-600">{loadError.message}</p>}
+          {lastSearch && !loading && (
             <p className="text-sm text-slate-500">
-              Last search: <span className="font-medium text-slate-700">{aiSearchResult.query}</span>
+              Last search: <span className="font-medium text-slate-700">{lastSearch}</span>
             </p>
           )}
         </form>
       </section>
 
-      {allExperts.length > 0 && (
+      {!loading && allExperts.length > 0 && (
         <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
           <div className="mb-6">
             <p className="text-sm font-medium text-slate-500">AI Search Results</p>
@@ -144,13 +129,13 @@ export function AiSearchPage() {
         </section>
       )}
 
-      {search.loading && (
+      {loading && (
         <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm text-center">
           <p className="text-slate-500">Searching experts…</p>
         </div>
       )}
 
-      {!search.loading && query && allExperts.length === 0 && (
+      {!loading && query && allExperts.length === 0 && (
         <div className="rounded-[28px] border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
           <p className="text-slate-500">No experts found matching your search. Try a different query.</p>
         </div>

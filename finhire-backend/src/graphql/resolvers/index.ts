@@ -2,6 +2,8 @@ import { randomUUID } from "crypto";
 import type { GraphQLContext } from "../context";
 import { comparePassword, hashPassword, signToken } from "../../utils/auth";
 import { PrismaClient } from "@prisma/client";
+import callOpenAI from "../../utils/openAi";
+import filterExperts from "../../utils/filterExperts";
 
 type AppUser = {
   id: string;
@@ -121,8 +123,12 @@ export const resolvers = {
     me: async (_: unknown, __: unknown, ctx: GraphQLContext) => {
       const auth = requireAuth(ctx);
       const user = await ctx.db.user.findUnique({ where: { id: auth.userId } });
-      console.log("hello"+user);
       return user ? mapUser(user) : null;
+    },
+
+    aiSearch: async (_: unknown, { query }: { query: string }, ctx: GraphQLContext) => {
+      const response = await callOpenAI(query);
+      return filterExperts({ filters: response as any });
     },
 
     expertProfile: async (_: unknown, { userId }: { userId: string }, ctx: GraphQLContext) => {
@@ -143,53 +149,8 @@ export const resolvers = {
       },
       ctx: GraphQLContext,
     ) => {
-      console.log(filters);
-      const users = await ctx.db.user.findMany({
-        where: {
-          role: "EXPERT",
-          ...(filters?.location
-            ? { location: { contains: filters.location } }
-            : {}),
-          // expertProfile: {
-          //   ...(filters?.expertType ? { expertType: filters.expertType } : {}),
-          //   ...(filters?.minYearsExperience !== undefined
-          //     ? { yearsExperience: { gte: filters.minYearsExperience } }
-          //     : {}),
-          // },
-        },
-        include: {
-          expertProfile: true,
-          reviewsGot: { select: { rating: true } },
-        },
-      });
-
-      const mapped = users
-        .filter((u: any) => u.expertProfile)
-        .map((u: any) => {
-          const ratings = u.reviewsGot.map((r:any) => r.rating);
-          const reviewCount = ratings.length;
-          const averageRating =
-            reviewCount === 0
-              ? 0
-              : ratings.reduce((sum: any, rating: any) => sum + rating, 0) / reviewCount;
-
-          return {
-            user: mapUser(u),
-            title: u.expertProfile!.title,
-            expertType: u.expertProfile!.expertType,
-            yearsExperience: u.expertProfile!.yearsExperience,
-            hourlyRate: u.expertProfile!.hourlyRate ? Number(u.expertProfile!.hourlyRate) : null,
-            bio: u.expertProfile!.bio,
-            averageRating,
-            reviewCount,
-          };
-        })
-        .filter((expert: any) =>
-          filters?.minRating !== undefined ? expert.averageRating >= filters.minRating : true,
-        )
-        .sort((a: any, b: any) => b.averageRating - a.averageRating || b.reviewCount - a.reviewCount);
-
-      return mapped;
+      
+      return filterExperts({ filters });
     },
 
     quotesForMe: async (_: unknown, __: unknown, ctx: GraphQLContext) => {

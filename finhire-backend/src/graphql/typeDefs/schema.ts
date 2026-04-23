@@ -181,6 +181,7 @@ export const typeDefs = gql`
 
   type Query {
     me: User
+    aiSearch(query: String!): [ExpertProfile!]!
     expertProfile(userId: ID!): ExpertProfile
     searchExperts(filters: SearchExpertsInput): [ExpertProfile!]!
     quotesForMe: [QuoteRequest!]!

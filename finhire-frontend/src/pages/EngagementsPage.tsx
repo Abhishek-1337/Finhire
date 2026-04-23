@@ -17,9 +17,6 @@ export function EngagementsPage() {
   const [completeEngagement, { loading: completing }] = useMutation(COMPLETE_ENGAGEMENT);
   const [addReview, { loading: reviewing }] = useMutation(ADD_REVIEW);
 
-
-  console.log(engagements.data);
-
   const handleCompleteEngagement = async (engagementId: string) => {
     setError("");
     try {
