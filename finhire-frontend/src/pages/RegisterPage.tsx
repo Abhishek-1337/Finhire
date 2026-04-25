@@ -51,13 +51,18 @@ export function RegisterPage() {
 
         setSession(res.data.register.token, res.data.register.user.role);
 
-        navigate("/profile", {
-          replace: true,
-          state: {
-            email: values.email,
-            notice: "Account created. Please sign in.",
-          },
-        });
+        if(res.data.register.user.role === "BUSINESS") {
+          navigate("/");
+        }
+        else {
+          navigate("/profile", {
+            replace: true,
+            state: {
+              email: values.email,
+              notice: "Account created. Please sign in.",
+            },
+          });
+        }
       } catch (error) {
         setServerError(getGraphqlErrorMessage(error));
       } finally {

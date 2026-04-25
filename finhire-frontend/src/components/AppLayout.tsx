@@ -256,7 +256,7 @@ export function AppLayout() {
                 >
                   <Bell className="w-4 h-4 text-slate-600" />
                   {unreadCount > 0 ? (
-                    <span className="absolute -top-1 -right-1 inline-flex items-center justify-center rounded-full bg-rose-600 text-white text-[10px] px-1 py-0.2">
+                    <span className="absolute -top-1 -right-1 inline-flex items-center justify-center rounded-full bg-rose-600 text-white text-[10px] px-[7px] py-0.4">
                       {unreadCount}
                     </span>
                   ) : null}
@@ -300,7 +300,7 @@ export function AppLayout() {
                 ) : null}
               </div>
             )}
-            <SessionBadge token={token} role={role} username={meData?.me.name.split(" ")[0] ?? null}/>
+            <SessionBadge token={token} role={role} username={meData?.me?.name.split(" ")[0] ?? null}/>
             {token && <LogoutButton onClick={handleLogout} />}
           </div>
 

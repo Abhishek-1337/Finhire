@@ -80,38 +80,48 @@ export function QuotesPage() {
         <div className="pointer-events-none absolute -left-16 -top-16 h-72 w-72 rounded-full bg-sky-300/30 blur-3xl" />
         <div className="pointer-events-none absolute -right-16 -bottom-16 h-56 w-56 rounded-full bg-slate-200/70 blur-3xl" />
 
-	        <div className="relative max-w-3xl space-y-4">
-	          <span className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Quotes</span>
-	          <h1 className="text-4xl font-semibold tracking-tight text-slate-950">Track your quote requests and proposals.</h1>
-	          <p className="max-w-2xl text-slate-500 leading-7">
-	            Request quotes from an expert’s profile, then manage all activity here.
-	          </p>
-	        </div>
-	      </section>
+        <div className="relative max-w-3xl space-y-4">
+          <span className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Quotes</span>
+          <h1 className="text-4xl font-semibold tracking-tight text-slate-950">
+            {role === "BUSINESS"
+              ? "Track quote requests and accepted proposals."
+              : "Review incoming quote requests and submit proposals."}
+          </h1>
+          <p className="max-w-2xl text-slate-500 leading-7">
+            {role === "BUSINESS"
+              ? "Request quotes from expert profiles and manage all responses in one place."
+              : "See businesses requesting quotes and respond with your best proposal."}
+          </p>
+        </div>
+      </section>
 
       <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-	        <section className="rounded-[28px] border border-slate-200 bg-slate-50 p-6 shadow-sm">
-	          <div className="mb-5">
-	            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">Request a quote</p>
-	            <h2 className="mt-2 text-xl font-semibold text-slate-950">Start from search</h2>
-	          </div>
+        <section className="rounded-[28px] border border-slate-200 bg-slate-50 p-6 shadow-sm">
+          <div className="mb-5">
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">
+              {role === "BUSINESS" ? "Request a quote" : "Quote requests"}
+            </p>
+            <h2 className="mt-2 text-xl font-semibold text-slate-950">
+              {role === "BUSINESS" ? "Start from search" : "Review new opportunities"}
+            </h2>
+          </div>
 
-	          {role === "BUSINESS" ? (
-	            <div className="rounded-3xl border border-slate-200 bg-white p-6 text-slate-600 space-y-3">
-	              <p>Open an expert profile from search to request a quote.</p>
-	              <Link
-	                to="/"
-	                className="inline-flex items-center justify-center rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700"
-	              >
-	                Go to search
-	              </Link>
-	            </div>
-	          ) : (
-	            <div className="rounded-3xl border border-slate-200 bg-white p-6 text-slate-600">
-	              Experts can review incoming quote requests below.
-	            </div>
-	          )}
-	        </section>
+          {role === "BUSINESS" ? (
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 text-slate-600 space-y-3">
+              <p>Open an expert profile from search to request a quote.</p>
+              <Link
+                to="/"
+                className="inline-flex items-center justify-center rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700"
+              >
+                Go to search
+              </Link>
+            </div>
+          ) : (
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 text-slate-600">
+              Review quote requests from businesses and submit the best proposal.
+            </div>
+          )}
+        </section>
 
         <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
           <div className="mb-5">

@@ -140,12 +140,11 @@ export function ExpertProfilePage() {
     type: "success" | "error";
     text: string;
   } | null>(null);
-
   const { data: meData, loading: meLoading } = useQuery<{ me: { id: string } }>(ME, {
     fetchPolicy: "cache-and-network",
   });
 
-  const userId = meData?.me?.id;
+  const userId = meData?.me?.id ?? null;
 
   const {
     data: profileData,
@@ -157,16 +156,16 @@ export function ExpertProfilePage() {
     fetchPolicy: "cache-and-network",
   });
 
-  const profile = profileData?.expertProfile;
+  const profile = profileData?.expertProfile ?? null;
+  const showLoading = meLoading || profileLoading || (userId !== null && profileData === undefined);
+
   const [isEditMode, setIsEditMode] = useState(true);
 
   useEffect(() => {
-    if (profile) {
-      setIsEditMode(false);
-    } else if (userId) {
-      setIsEditMode(true);
+    if (profileData !== undefined) {
+      setIsEditMode(!profile);
     }
-  }, [profile, userId]);
+  }, [profile, profileData]);
 
   const [upsertExpertProfile] = useMutation(UPSERT_EXPERT_PROFILE);
 
@@ -238,15 +237,13 @@ export function ExpertProfilePage() {
             </Card>
           ) : (
             <>
-              {(meLoading || profileLoading) && (
+              {showLoading ? (
                 <Card>
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-center py-20 text-slate-500">Loading profile…</div>
                   </CardContent>
                 </Card>
-              )}
-
-              {!meLoading && !profileLoading && profile && !isEditMode ? (
+              ) : profile && !isEditMode ? (
                 <Card className="shadow-sm">
                   <CardContent className="pt-6 space-y-6">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

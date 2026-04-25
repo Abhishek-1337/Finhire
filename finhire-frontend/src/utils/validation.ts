@@ -78,7 +78,8 @@ export const ExpertProfileSchema: Yup.ObjectSchema<ExpertProfileFormValues> = Yu
 
   hourlyRate: Yup.string()
     .matches(/^\d*\.?\d{0,2}$/, "Enter a valid rate (e.g. 150 or 99.99)")
-    .test("min", "Rate must be greater than 0", (v) => !v || Number(v) > 0),
+    .test("min", "Rate must be greater than 0", (v) => !v || Number(v) > 0)
+    .required("Hourly rate is required"),
 
   bio: Yup.string()
     .min(20, "Bio must be at least 20 characters")
