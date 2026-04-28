@@ -8,7 +8,7 @@ import "./index.css";
 import App from "./App";
 
 const httpLink = new HttpLink({
-  uri: import.meta.env.VITE_GRAPHQL_URL ?? "http://localhost:4000",
+  uri: "/api"
 });
 
 const authLink = setContext((_, { headers }) => {
