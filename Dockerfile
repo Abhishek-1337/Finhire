@@ -4,7 +4,7 @@
 FROM node:20-alpine AS backend-build
 WORKDIR /app/backend
 
-COPY finhire-backend/package.json finhire-backend/tsconfig.json ./
+COPY finhire-backend/package.json finhire-backend/package-lock.json finhire-backend/tsconfig.json ./
 COPY finhire-backend/prisma ./prisma
 COPY finhire-backend/src ./src
 
@@ -15,7 +15,7 @@ RUN npm run build
 FROM node:20-alpine AS frontend-build
 WORKDIR /app/frontend
 
-COPY finhire-frontend/package.json finhire-frontend/tsconfig.json finhire-frontend/tsconfig.app.json finhire-frontend/tsconfig.node.json finhire-frontend/vite.config.ts finhire-frontend/index.html ./
+COPY finhire-frontend/package.json finhire-frontend/package-lock.json finhire-frontend/tsconfig.json finhire-frontend/tsconfig.app.json finhire-frontend/tsconfig.node.json finhire-frontend/vite.config.ts finhire-frontend/index.html ./
 COPY finhire-frontend/public ./public
 COPY finhire-frontend/src ./src
 
