@@ -4,6 +4,7 @@ import { useQuery } from "@apollo/client/react";
 
 import { getRole } from "../auth/session";
 import { EXPERT_PROFILE, ME } from "../graphql/documents";
+import { Spinner } from "./ui/Spinner";
 
 export function RequireExpertProfile({ children }: { children: ReactNode }) {
   const location = useLocation();
@@ -30,7 +31,9 @@ export function RequireExpertProfile({ children }: { children: ReactNode }) {
   if (!isExpert) return children;
 
   if (meLoading || profileLoading) {
-    return <div className="px-6 py-10 text-slate-500">Loading…</div>;
+    return <div className="px-6 py-10 text-slate-500 w-full h-screen flex items-center justify-center">
+      <Spinner className="h-6 w-6" />
+    </div>;
   }
 
   if (meError || profileError) {
@@ -41,6 +44,7 @@ export function RequireExpertProfile({ children }: { children: ReactNode }) {
   if (!hasProfile) {
     return <Navigate to="/profile" replace state={{ from: location.pathname }} />;
   }
+  
 
   return children;
 }
