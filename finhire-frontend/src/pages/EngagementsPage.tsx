@@ -5,6 +5,7 @@ import { ENGAGEMENTS_FOR_ME, COMPLETE_ENGAGEMENT, ADD_REVIEW } from "../graphql/
 import { getGraphqlErrorMessage } from "../utils/graphqlErrors";
 import { Link } from "react-router-dom";
 import Review from "../components/ui/Review";
+import { Spinner } from "../components/ui/Spinner";
 
 export function EngagementsPage() {
   const role = getRole();
@@ -78,8 +79,9 @@ export function EngagementsPage() {
             <h2 className="mt-2 text-xl font-semibold text-slate-950">Project status</h2>
           </div>
 
-          {engagements.loading ? <p className="text-slate-500">Loading engagements…</p> : null}
-          <div className="grid gap-4">
+          {engagements.loading ? 
+           <Spinner className="mx-auto my-12" /> : 
+            <div className="grid gap-4">
             {engagementItems.length ? (
               engagementItems.map((engagement: any) => (
                 <article key={engagement.id} className="rounded-3xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
@@ -169,6 +171,8 @@ export function EngagementsPage() {
               </div>
             )}
           </div>
+          }
+          
           {error ? <p className="mt-4 text-sm font-medium text-rose-600">{error}</p> : null}
         </section>
       </div>

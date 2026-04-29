@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { getRole } from "../auth/session";
-import { QUOTES_FOR_ME, UPDATE_QUOTE_STATUS, SUBMIT_PROPOSAL, START_ENGAGEMENT } from "../graphql/documents";
+import { QUOTES_FOR_ME, UPDATE_QUOTE_STATUS, SUBMIT_PROPOSAL, START_ENGAGEMENT, ENGAGEMENTS_FOR_ME } from "../graphql/documents";
 import { getGraphqlErrorMessage } from "../utils/graphqlErrors";
+import { Spinner } from "../components/ui/Spinner";
+import { Card, CardContent } from "../components/ui/Card";
 
 export function QuotesPage() {
   const role = getRole();
@@ -14,6 +16,7 @@ export function QuotesPage() {
   const [error, setError] = useState("");
 
   const quotes = useQuery(QUOTES_FOR_ME, { fetchPolicy: "cache-and-network" });
+  const engagements = useQuery(ENGAGEMENTS_FOR_ME, { fetchPolicy: "cache-and-network", skip: role !== "BUSINESS" });
   const [updateQuoteStatus, { loading: updatingStatus }] = useMutation(UPDATE_QUOTE_STATUS);
   const [submitProposal, { loading: submittingProposal }] = useMutation(SUBMIT_PROPOSAL);
   const [startEngagement, { loading: startingEngagement }] = useMutation(START_ENGAGEMENT);
@@ -66,12 +69,16 @@ export function QuotesPage() {
         },
       });
       await quotes.refetch();
+      if (role === "BUSINESS") {
+        await engagements.refetch();
+      }
     } catch (err) {
       setError(getGraphqlErrorMessage(err));
     }
   };
 
   const quoteItems = (quotes.data as any)?.quotesForMe ?? [];
+  const engagementItems = (engagements.data as any)?.engagementsForMe ?? [];
   console.log(quoteItems);
 
   return (
@@ -128,8 +135,13 @@ export function QuotesPage() {
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">Your quotes</p>
             <h2 className="mt-2 text-xl font-semibold text-slate-950">Recent activity</h2>
           </div>
-          {quotes.loading ? <p className="text-slate-500">Loading quotes…</p> : null}
-          <div className="grid gap-4">
+          {quotes.loading ? 
+            <Card>
+              <CardContent className="pt-6 space-y-6">
+              <Spinner className="mx-auto my-12" />
+              </CardContent>
+            </Card> : 
+            <div className="grid gap-4">
             {quoteItems.length ? (
               quoteItems.map((quote: any) => (
                 <article key={quote.id} className="rounded-3xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
@@ -227,7 +239,10 @@ export function QuotesPage() {
                       </div>
                     </div>
                   ) : null}
-                  {role === "BUSINESS" && quote.proposal ? (
+                  {role === "BUSINESS" &&
+                  quote.proposal &&
+                  !engagements.loading &&
+                  !engagementItems.some((engagement: any) => engagement.proposalId === quote.proposal.id) ? (
                     <div className="mt-4">
                       <button
                         type="button"
@@ -247,6 +262,8 @@ export function QuotesPage() {
               </div>
             )}
           </div>
+          }
+          
         </section>
       </div>
     </>

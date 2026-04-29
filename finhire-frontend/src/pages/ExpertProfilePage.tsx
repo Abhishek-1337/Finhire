@@ -239,8 +239,8 @@ export function ExpertProfilePage() {
             <>
               {showLoading ? (
                 <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-center py-20 text-slate-500">Loading profile…</div>
+                  <CardContent className="pt-6 space-y-6">
+                    <Spinner className="mx-auto my-12" />
                   </CardContent>
                 </Card>
               ) : profile && !isEditMode ? (

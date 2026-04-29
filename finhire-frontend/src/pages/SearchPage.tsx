@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "@apollo/client/react";
 import { Link } from "react-router-dom";
 import { SEARCH_EXPERTS, TOGGLE_FAVORITE, FAVORITES_FOR_ME } from "../graphql/documents";
 import { CountryDropdown } from "../components/ui/Auth/CountryDropdown";
+import { Spinner } from "../components/ui/Spinner";
 
 export function SearchPage() {
   const [searchLocation, setSearchLocation] = useState("");
@@ -136,11 +137,12 @@ export function SearchPage() {
                 <p className="text-sm font-medium text-slate-500">Search results</p>
                 <p className="mt-1 text-2xl font-semibold text-slate-900">{filteredExperts.length} experts found</p>
               </div>
-              {search.loading ? (
-                <span className="rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-600">Searching…</span>
-              ) : null}
+              
             </div>
-            <div className="mt-6 grid gap-4">
+            {search.loading ? (
+                <Spinner className="mx-auto mt-12" />
+              ) : 
+              <div className="mt-6 grid gap-4">
               {filteredExperts.length ? (
                 filteredExperts.map((expert: any) => (
                   <article key={expert.user.id} className="rounded-3xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
@@ -174,7 +176,9 @@ export function SearchPage() {
                   No experts match the current filters. Adjust your criteria to find more talent.
                 </div>
               )}
+            
             </div>
+              }
           </div>
         </section>
       </div>
