@@ -74,12 +74,12 @@ function HeroPanel() {
 
       {/* Stats */}
       <div className="relative grid grid-cols-3 gap-4">
-        {STATS.map(({ value, label }) => (
+        {/* {STATS.map(({ value, label }) => (
           <div key={label} className="space-y-0.5">
             <p className="text-2xl font-bold tracking-tight">{value}</p>
             <p className="text-xs text-slate-500 leading-snug">{label}</p>
           </div>
-        ))}
+        ))} */}
       </div>
     </div>
   );

@@ -42,7 +42,7 @@ function App() {
       />
       <Route element={<AppLayout />}>
         {role === "BUSINESS" && <Route index element={<SearchPage />} />}
-        {role === "EXPERT" && <Route index element={<Navigate to="/quotes" replace />} />}
+        {role === "EXPERT" && <Route index element={<Navigate to="/profile" replace />} />}
 
         <Route
           path="/ai-search"
